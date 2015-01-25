@@ -66,13 +66,15 @@ group* ExtendGroup(group* gr)
 }
 void TakeDame(group* gr, node *nod)
 {
+	printf("TakeDame");
 	unsigned int i;
 	for (i = 0; i < gr->damecount; i++)
 		if (gr->dame[i]->number == nod->number)
 		{
 			gr->dame[i] = gr->dame[gr->damecount - 1];
+			gr->damecount--;
 		}
-	if (gr->damecount)gr->damecount--;
+	printf("%d", gr->damecount);
 }
 void AddStore(group* gr, node *nod)
 {
@@ -97,8 +99,10 @@ void AddDame(group* gr, node *nod)
 		if (gr->dame[i]->number == nod->number) add = 0;
 	if (add)
 	{
+		printf("AddDame");
 		gr->dame[gr->damecount] = nod;
 		gr->damecount++;
+		printf("%d", gr->damecount);
 	}
 }
 void DrawImage(SDL_Surface * screen, SDL_Surface * img, int x, int y, int w, int h, int sx, int sy)
@@ -193,13 +197,155 @@ SDL_Surface * LoadImage(char* name)
 	}
 	return image;
 }
+void Move(int x, int y, unsigned int *move, unsigned int *groups, unsigned int *countpas, 	SDL_Surface * screen, 
+	SDL_Surface * blackbmp, SDL_Surface * whitebmp, SDL_Surface * moveblack, SDL_Surface * movewhite, SDL_Surface * nodebmp)
+{
+	SDL_Surface * substitution;
+	int col, str;
+	x -= 220;
+	y -= 120;
+	if (x % 20 < 10) x /= 20;
+	else x = x / 20 + 1;
+	if (y % 20 < 10) y /= 20;
+	else y = y / 20 + 1;
+	str = y;
+	col = x;
 
+	if (pole[col][str].color == 0)
+	{
+		unsigned int neighbor = 0, color = 0;
+		printf("move %d ", *move);
+		if (*move % 2 == 1)
+		{
+			substitution = blackbmp;
+			color = 1;
+		}
+		else
+		{
+			substitution = whitebmp;
+			color = 2;
+		}
+		DrawImage(screen, substitution, 220 + x * 20 - 7, 120 + y * 20 - 7, 15, 15, 0, 0);
+		pole[col][str].color = color;
+		neighbor = SameStone(&pole[col][str], str - 1, col, color, neighbor);
+		neighbor = SameStone(&pole[col][str], str + 1, col, color, neighbor);
+		neighbor = SameStone(&pole[col][str], str, col - 1, color, neighbor);
+		neighbor = SameStone(&pole[col][str], str, col + 1, color, neighbor);
+		if (!neighbor)
+		{
+			arrGgoup[*groups] = CreateGroup(groups, 30, color);
+			AddStore(arrGgoup[*groups], &pole[col][str]);
+			groups++;
+		}
+		OtherStone(&pole[col][str], str - 1, col, color, screen, nodebmp);
+		OtherStone(&pole[col][str], str + 1, col, color, screen, nodebmp);
+		OtherStone(&pole[col][str], str, col - 1, color, screen, nodebmp);
+		OtherStone(&pole[col][str], str, col + 1, color, screen, nodebmp);
+		EmptyNode(pole[col][str].gr, str - 1, col);
+		EmptyNode(pole[col][str].gr, str + 1, col);
+		EmptyNode(pole[col][str].gr, str, col - 1);
+		EmptyNode(pole[col][str].gr, str, col + 1);
+		printf("%d %d number %d color %d gr %d \n", col, str, pole[col][str].number, pole[col][str].color, pole[col][str].gr);
+		*countpas = 0;
+		(*move)++;
+		if (color == 1)DrawImage(screen, movewhite, 200, 20, 400, 60, 0, 0);
+		else DrawImage(screen, moveblack, 200, 20, 400, 60, 0, 0);
 
+	}
+}
+void IsThisTheEnd(int col, int str, int* b, int* w, int dec, int column)
+{
+	while (pole[col][str].color == 0 && col>=0 && col<19 && str>=0 && str<19)
+	{
+		if (dec)
+		{
+			if (column) col--;
+			else str--;
+		}
+		else
+		{
+			if (column) col++;
+			else str++;
+		}
+		if (col >= 0 && col < 19 && str >= 0 && str < 19)
+		{
+			if (pole[col][str].color == 1) (*b)++;
+			if (pole[col][str].color == 2) (*w)++;
+		}
+	}
+}
+void ThisIsTheEnd(int i, int j, int dec, int column)
+{
+	int col = i, str = j;
+	while (pole[i][j].color == 0 && col >= 0 && col<19 && str >= 0 && str<19)
+	{
+		if (dec)
+		{
+			if (column) col--;
+			else str--;
+		}
+		else
+		{
+			if (column) col++;
+			else str++;
+		}
+		if (col >= 0 && col < 19 && str >= 0 && str < 19) 
+			pole[i][j].color = pole[col][str].color;
+	}
+}
+void Pas(SDL_Surface * screen,	SDL_Surface * blackbmp, SDL_Surface * whitebmp, SDL_Surface * winblack, SDL_Surface * winwhite, SDL_Surface * noend)
+{
+	{
+		int b = 0, w = 0, i, j;
+		for (i = 0; i < 19; i++)
+		{
+			for (j = 0; j < 19; j++)
+			{
+				b = 0;
+				w = 0;
+				IsThisTheEnd(i, j, &b, &w, 1, 1);
+				IsThisTheEnd(i, j, &b, &w, 1, 0);
+				IsThisTheEnd(i, j, &b, &w, 0, 1);
+				IsThisTheEnd(i, j, &b, &w, 0, 0);
+				if (b && w) break;
+			}
+			if (b && w) break;
+		}
+		if (b && w) DrawImage(screen, noend, 200, 20, 400, 60, 0, 0);
+		else
+		{
+			int result1 = 0, result2 = 0;
+			for (i = 0; i < 19; i++)
+				for (j = 0; j < 19; j++)
+				{
+					ThisIsTheEnd(i, j, 0, 1);
+					ThisIsTheEnd(i, j, 0, 0);
+					ThisIsTheEnd(i, j, 1, 1);
+					ThisIsTheEnd(i, j, 1, 0);
+					if (pole[i][j].color == 1)
+					{
+						DrawImage(screen, blackbmp, 220 + i * 20 - 7, 120 + j * 20 - 7, 15, 15, 0, 0);
+						SDL_Flip(screen);
+						result1++;
+					}
+					if (pole[i][j].color == 2)
+					{
+						DrawImage(screen, whitebmp, 220 + i * 20 - 7, 120 + j * 20 - 7, 15, 15, 0, 0);
+						SDL_Flip(screen);
+						result2++;
+					}
+				}
+			printf("black - %d, white - %d", result1, result2);
+			if (result1 > result2) DrawImage(screen, winblack, 200, 20, 400, 60, 0, 0);
+			else DrawImage(screen, winwhite, 200, 20, 400, 60, 0, 0);
+		}
+	}
+}
 
 int main() {
 	SDL_Event event;
-	unsigned int done = 0, move = 1, i, j, groups = 1, countpas = 0, result1 = 0, result2 = 0;
-	
+	unsigned int done = 0, move = 1, i, j, groups = 1, countpas = 0;
+
 	for (i = 0; i < 19; i++)
 		for (j = 0; j < 19; j++)
 		{
@@ -225,7 +371,6 @@ int main() {
 		return 1;
 	}
 
-	SDL_Surface *substitution;
 	SDL_Surface *polebmp = LoadImage("pole.bmp");
 	SDL_Surface *pravila = LoadImage("pravila.bmp");
 	SDL_Surface *noend = LoadImage("noend.bmp");
@@ -257,58 +402,10 @@ int main() {
 		   {
 			   if (event.button.button = SDL_BUTTON_LEFT)
 			   {
-				   int x = event.button.x, y = event.button.y, str, col;  // Координаты клика
+				   int x = event.button.x, y = event.button.y;  // Координаты клика
 				   if ((x >= 220) && (x <= 580) && (y >= 120) && (y <= 480))
 				   {
-					   x -= 220;
-					   y -= 120;
-					   if (x % 20 < 10) x /= 20;
-					   else x = x/20 + 1;
-					   if (y % 20 < 10) y /= 20;
-					   else y = y/20 + 1;
-					   str = y;
-					   col = x;
-					   
-					   if (pole[col][str].color == 0)
-					   {
-						   unsigned int neighbor = 0, color =0;
-						   if (move % 2 == 1)
-						   {
-							   substitution = blackbmp;
-							   color = 1;
-						   }
-						   else
-						   {
-							   substitution = whitebmp;
-		   					   color = 2;
-						   }
-							   DrawImage(screen, substitution, 220 + x * 20 - 7, 120 + y * 20 - 7, 15, 15, 0, 0);
-							   pole[col][str].color = color;
-							   neighbor = SameStone(&pole[col][str], str - 1, col, color, neighbor);
-							   neighbor = SameStone(&pole[col][str], str + 1, col, color, neighbor);
-							   neighbor = SameStone(&pole[col][str], str, col - 1, color, neighbor);
-							   neighbor = SameStone(&pole[col][str], str, col + 1, color, neighbor);
-							   if (!neighbor)
-							   {
-								   arrGgoup[groups] = CreateGroup(groups, 30, color);
-								   AddStore(arrGgoup[groups], &pole[col][str]);
-								   groups++;
-							   }
-							   OtherStone(&pole[col][str], str - 1, col, color, screen, nodebmp);
-							   OtherStone(&pole[col][str], str + 1, col, color, screen, nodebmp);
-							   OtherStone(&pole[col][str], str, col - 1, color, screen, nodebmp);
-							   OtherStone(&pole[col][str], str, col + 1, color, screen, nodebmp);
-							   EmptyNode(pole[col][str].gr, str - 1, col);
-							   EmptyNode(pole[col][str].gr, str + 1, col);
-							   EmptyNode(pole[col][str].gr, str, col - 1);
-							   EmptyNode(pole[col][str].gr, str, col + 1);
-							   printf("%d %d number %d color %d gr %d \n", col, str, pole[col][str].number, pole[col][str].color, pole[col][str].gr);
-							   countpas = 0;
-							   move++;
-							   if (color == 1)DrawImage(screen, movewhite, 200, 20, 400, 60, 0, 0);
-							   else DrawImage(screen, moveblack, 200, 20, 400, 60, 0, 0);
-						   
-					   }
+					   Move(x, y, &move, &groups, &countpas, screen, blackbmp, whitebmp, moveblack, movewhite, nodebmp);
 				   }
 				   if ((x >= 620) && (x <= 700) && (y >= 460) && (y <= 500))
 				   {
@@ -325,95 +422,7 @@ int main() {
 				   }
 				   if (countpas == 2)
 				   {
-					   int b = 0, w = 0;
-					   for (i = 0; i < 19; i++)
-						   for (j = 0; j < 19; j++)
-						   {
-							   int col = i, str = j;
-							   b = 0;
-							   w = 0;
-							   while (pole[col][str].color == 0 && col > 0)
-							   {
-								   col--;
-								   if ( pole[col][str].color == 1) b++;
-								   if ( pole[col][str].color == 1) w++;
-							   }
-							   col = i;
-							   str = j;
-							   while (pole[col][str].color == 0 && str > 0)
-							   {
-								   str--;
-								   if (pole[col][str].color == 1) b++;
-								   if (pole[col][str].color == 1) w++;
-							   }
-							   col = i;
-							   str = j;
-							   while (pole[col][str].color == 0 && col < 18)
-							   {
-								   col++;
-								   if (pole[col][str].color == 1) b++;
-								   if (pole[col][str].color == 1) w++;
-							   }
-							   col = i;
-							   str = j;
-							   while (pole[col][str].color == 0 && str < 18)
-							   {
-								   str++;
-								   if (pole[col][str].color == 1) b++;
-								   if (pole[col][str].color == 1) w++;
-							   }
-							   if (b && w) break;
-						   }
-					   if (b && w) DrawImage(screen, noend, 200, 20, 400, 60, 0, 0);
-					   else
-					   {
-						   for (i = 0; i < 19; i++)
-							   for (j = 0; j < 19; j++)
-							   {
-								   int col = i, str = j;
-								   while (pole[i][j].color == 0 && col > 0)
-								   {
-									   col--;
-									   pole[i][j].color = pole[col][str].color;
-								   }
-								   col = i;
-								   str = j;
-								   while (pole[i][j].color == 0 && str > 0)
-								   {
-									   str--;
-									   pole[i][j].color = pole[col][str].color;
-								   }
-								   col = i;
-								   str = j;
-								   while (pole[i][j].color == 0 && col < 18)
-								   {
-									   col++;
-									   pole[i][j].color = pole[col][str].color;
-								   }
-								   col = i;
-								   str = j;
-								   while (pole[i][j].color == 0 && str < 18)
-								   {
-									   str++;
-									   pole[i][j].color = pole[col][str].color;
-								   }
-								   if (pole[i][j].color == 1)
-								   {
-									   DrawImage(screen, blackbmp, 220 + i * 20 - 7, 120 + j * 20 - 7, 15, 15, 0, 0);
-									   SDL_Flip(screen);
-									   result1++;
-								   }
-								   if (pole[i][j].color == 2)
-								   {
-									   DrawImage(screen, whitebmp, 220 + i * 20 - 7, 120 + j * 20 - 7, 15, 15, 0, 0);
-									   SDL_Flip(screen);
-									   result2++;
-								   }
-							   }
-						   printf("black - %d, white - %d", result1, result2);
-						   if (result1 > result2) DrawImage(screen, winblack, 200, 20, 400, 60, 0, 0);
-						   else DrawImage(screen, winwhite, 200, 20, 400, 60, 0, 0);
-					   }
+					   Pas(screen, blackbmp, whitebmp, winblack, winwhite, noend);
 				   }
 				   SDL_Flip(screen);
 
