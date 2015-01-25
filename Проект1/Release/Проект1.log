@@ -1,8 +1,11 @@
-﻿Сборка начата 24.01.2015 19:51:04.
+﻿Сборка начата 25.01.2015 21:04:51.
      1>Проект "C:\Users\Teri\documents\visual studio 2013\Projects\Проект1\Проект1\Проект1.vcxproj" в узле 2 (целевые объекты Build).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I"C:\Users\Teri\Documents\Visual Studio 2013\Projects\SDL-1.2.15\include" /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TC /analyze- /errorReport:prompt game.c
          game.c
+     1>game.c(191): warning C4020: perror: слишком много фактических параметров
+     1>game.c(215): warning C4020: perror: слишком много фактических параметров
+     1>game.c(224): warning C4020: perror: слишком много фактических параметров
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Teri\documents\visual studio 2013\Projects\Проект1\Release\Проект1.exe" /NOLOGO /LIBPATH:"C:\Users\Teri\Documents\Visual Studio 2013\Projects\SDL-1.2.15\lib\x86" SDL.lib SDLmain.lib. kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Teri\documents\visual studio 2013\Projects\Проект1\Release\Проект1.pdb" /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Teri\documents\visual studio 2013\Projects\Проект1\Release\Проект1.lib" /MACHINE:X86 /SAFESEH Release\game.obj
          Создание кода
@@ -12,4 +15,4 @@
 
 Сборка успешно завершена.
 
-Затраченное время: 00:00:01.31
+Затраченное время: 00:00:00.75

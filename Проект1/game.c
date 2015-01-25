@@ -184,6 +184,16 @@ void PrintArr()
 		printf("\n");
 	}
 }
+SDL_Surface * LoadImage(char* name)
+{
+	SDL_Surface *image = SDL_LoadBMP(name);
+	if (image == NULL){
+		perror("SDL_LoadBMP Error: %s", SDL_GetError());
+		abort();
+	}
+	return image;
+}
+
 
 
 int main() {
@@ -202,7 +212,7 @@ int main() {
 
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
 	{
-		printf("Unable to init SDL: %s", SDL_GetError());
+		perror("Unable to init SDL: %s", SDL_GetError());
 		return 1;
 	}
 
@@ -211,66 +221,22 @@ int main() {
 
 	if(!screen)
 	{
-		printf("Can't set videomode: %s", SDL_GetError());
+		perror("Can't set videomode: %s", SDL_GetError());
 		return 1;
 	}
 
 	SDL_Surface *substitution;
-	SDL_Surface *polebmp = SDL_LoadBMP("pole.bmp");
-	if (polebmp == NULL){
-		printf("SDL_LoadBMP Error: %s", SDL_GetError());
-		return 1;
-	}
-	SDL_Surface *pravila = SDL_LoadBMP("pravila.bmp");
-	if (pravila == NULL){
-		printf("SDL_LoadBMP Error: %s", SDL_GetError());
-		return 1;
-	}
-	SDL_Surface *noend = SDL_LoadBMP("noend.bmp");
-	if (noend == NULL){
-		printf("SDL_LoadBMP Error: %s", SDL_GetError());
-		return 1;
-	}
-	SDL_Surface *movewhite = SDL_LoadBMP("movewhite.bmp");
-	if (movewhite == NULL){
-		printf("SDL_LoadBMP Error: %s", SDL_GetError());
-		return 1;
-	}
-	SDL_Surface *moveblack = SDL_LoadBMP("moveblack.bmp");
-	if (moveblack == NULL){
-		printf("SDL_LoadBMP Error: %s", SDL_GetError());
-		return 1;
-	}
-	SDL_Surface *winwhite = SDL_LoadBMP("winwhite.bmp");
-	if (winwhite == NULL){
-		printf("SDL_LoadBMP Error: %s", SDL_GetError());
-		return 1;
-	}
-	SDL_Surface *winblack = SDL_LoadBMP("winblack.bmp");
-	if (winblack == NULL){
-		printf("SDL_LoadBMP Error: %s", SDL_GetError());
-		return 1;
-	}
-	SDL_Surface *blackbmp = SDL_LoadBMP("black.bmp");
-	if (blackbmp == NULL){
-		printf("SDL_LoadBMP Error: %s", SDL_GetError());
-		return 1;
-	}
-	SDL_Surface *whitebmp = SDL_LoadBMP("white.bmp");
-	if (whitebmp == NULL){
-		printf("SDL_LoadBMP Error: %s", SDL_GetError());
-		return 1;
-	}
-	SDL_Surface *nodebmp = SDL_LoadBMP("yzel.bmp");
-	if (nodebmp == NULL){
-		printf("SDL_LoadBMP Error: %s", SDL_GetError());
-		return 1;
-	}
-	SDL_Surface *pas = SDL_LoadBMP("pas.bmp");
-	if (pas == NULL){
-		printf("SDL_LoadBMP Error: %s", SDL_GetError());
-		return 1;
-	}
+	SDL_Surface *polebmp = LoadImage("pole.bmp");
+	SDL_Surface *pravila = LoadImage("pravila.bmp");
+	SDL_Surface *noend = LoadImage("noend.bmp");
+	SDL_Surface *movewhite = LoadImage("movewhite.bmp");
+	SDL_Surface *moveblack = LoadImage("moveblack.bmp");
+	SDL_Surface *winwhite = LoadImage("winwhite.bmp");
+	SDL_Surface *winblack = LoadImage("winblack.bmp");
+	SDL_Surface *blackbmp = LoadImage("black.bmp");
+	SDL_Surface *whitebmp = LoadImage("white.bmp");
+	SDL_Surface *nodebmp = LoadImage("yzel.bmp");
+	SDL_Surface *pas = LoadImage("pas.bmp");
 
 	DrawImage(screen, polebmp, 200, 100, 400, 400, 0, 0);
 	DrawImage(screen, pas, 620, 460, 80, 40, 0, 0);
@@ -457,7 +423,6 @@ int main() {
 		}
 
 	}
-
-
+	
 	return 0;
 }
